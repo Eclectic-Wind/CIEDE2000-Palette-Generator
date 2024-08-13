@@ -151,9 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let isDragging = false;
   let startX, startY;
 
+  imageContainer.style.cursor = "grab";
+
   imageContainer.addEventListener("mousedown", (e) => {
     if (!e.target.closest(".slider-container")) {
       isDragging = true;
+      imageContainer.style.cursor = "grabbing";
       startX = e.clientX - translateX;
       startY = e.clientY - translateY;
     }
@@ -169,6 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("mouseup", () => {
     isDragging = false;
+    imageContainer.style.cursor = "grab";
   });
 
   zoomIn.addEventListener("click", () => {

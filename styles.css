@@ -1,6 +1,6 @@
 :root {
   --bg-color: #ffffff;
-  --text-color: #545454;
+  --text-color: #333333;
   --button-bg: #3498db;
   --button-text: #ffffff;
   --button-hover: #2980b9;
@@ -10,7 +10,7 @@
 
 .dark {
   --bg-color: #1a1a1a;
-  --text-color: #dadada;
+  --text-color: #ffffff;
   --button-bg: #2980b9;
   --button-text: #ffffff;
   --button-hover: #3498db;
@@ -46,10 +46,6 @@ header {
 h1 {
   color: var(--text-color);
   margin: 0;
-}
-
-a:hover {
-  filter: brightness(1.2);
 }
 
 .controls {
@@ -114,6 +110,13 @@ button:hover {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  caret: transparent;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
 }
 
 #imagePreview,
