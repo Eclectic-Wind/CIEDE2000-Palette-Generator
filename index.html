@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CIEDE2000</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="color-reducer-worker.js"></script>
+    <script src="colorReducer.js" defer></script>
+    <script type="module" src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>CIEDE2000 Palette Generator</h1>
+        <button id="darkModeToggle"><i class="fas fa-moon"></i></button>
+      </header>
+      <div class="controls">
+        <input
+          type="file"
+          id="imageUpload"
+          accept="image/png"
+          class="file-input"
+        />
+        <div class="color-count">
+          <label for="colorCount">Colors:</label>
+          <input type="number" id="colorCount" value="16" min="2" max="256" />
+        </div>
+        <button id="reduceColors">Reduce Colors</button>
+      </div>
+      <div
+        id="loadingIndicator"
+        class="loading-indicator"
+        style="display: none"
+      >
+        <div class="spinner"></div>
+        <p>Processing image...</p>
+      </div>
+      <div class="image-compare">
+        <div class="image-container" id="imageContainer">
+          <img
+            id="imagePreview"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23ddd'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='%23555'%3EUpload Image%3C/text%3E%3C/svg%3E"
+            alt="Image preview"
+          />
+          <img
+            id="resultImage"
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23ddd'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='%23555'%3EResult Image%3C/text%3E%3C/svg%3E"
+            alt="Result image"
+          />
+        </div>
+        <div class="zoom-controls">
+          <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
+          <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
+          <button id="resetZoom"><i class="fas fa-undo"></i></button>
+        </div>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="slider" min="0" max="100" value="50" />
+      </div>
+      <div class="result-container">
+        <div id="paletteContainer" class="palette-container"></div>
+        <a id="downloadLink" class="download-btn" style="display: none"
+          >Download Reduced Image</a
+        >
+      </div>
+    </div>
+  </body>
+</html>
