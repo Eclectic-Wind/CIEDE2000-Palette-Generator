@@ -1,6 +1,6 @@
 # CIEDE2000-Palette-Generator
 
-A web app that reduces the color palette of an uploaded image using k-means clustering. It lets you choose the number of colors and provides a live preview of the original and reduced images.
+A web app that reduces the color palette of an uploaded image using k-means clustering and CIEDE2000 as the distance metric. It lets you choose the number of colors and provides a live preview of the original and reduced images.
 
 ## Features
 
