@@ -1,6 +1,6 @@
 :root {
   --bg-color: #ffffff;
-  --text-color: #333333;
+  --text-color: #545454;
   --button-bg: #3498db;
   --button-text: #ffffff;
   --button-hover: #2980b9;
@@ -10,7 +10,7 @@
 
 .dark {
   --bg-color: #1a1a1a;
-  --text-color: #ffffff;
+  --text-color: #dadada;
   --button-bg: #2980b9;
   --button-text: #ffffff;
   --button-hover: #3498db;
@@ -46,6 +46,10 @@ header {
 h1 {
   color: var(--text-color);
   margin: 0;
+}
+
+a:hover {
+  filter: brightness(1.2);
 }
 
 .controls {

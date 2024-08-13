@@ -1,5 +1,4 @@
-import('./colorReducer.js').then((module) => {
-  self.ColorReducer = module.ColorReducer;
+self.importScripts("colorReducer.js");
 
 self.addEventListener("message", function (e) {
   const { imageData, colorCount } = e.data;
