@@ -3,6 +3,8 @@ class ColorReducer {
     this.palette = [];
     this.labCache = new Map();
     this.onProgress = null;
+    this.paletteCache = new Map();
+    this.colorDistanceCache = new Map();
   }
 
   reduceColors(imageData, colorCount) {
@@ -15,11 +17,33 @@ class ColorReducer {
 
     const pixels = imageData.data;
     this.reportProgress("Analyzing Image", 0);
-    const palette = this.buildPalette(pixels, colorCount);
+
+    // Check if we have a cached palette for this image and color count
+    const imageHash = this.hashImageData(imageData);
+    const cacheKey = `${imageHash}-${colorCount}`;
+    let palette;
+
+    if (this.paletteCache.has(cacheKey)) {
+      palette = this.paletteCache.get(cacheKey);
+      this.reportProgress("Using Cached Palette", 40);
+    } else {
+      palette = this.buildPalette(pixels, colorCount);
+      this.paletteCache.set(cacheKey, palette);
+    }
+
     this.palette = palette;
     this.reportProgress("Applying Palette", 50);
     this.applyPalette(imageData, palette);
     return imageData;
+  }
+
+  hashImageData(imageData) {
+    // Simple hash function for ImageData
+    let hash = 0;
+    for (let i = 0; i < imageData.data.length; i++) {
+      hash = ((hash << 5) - hash + imageData.data[i]) | 0;
+    }
+    return hash;
   }
 
   buildPalette(pixels, colorCount) {
@@ -216,9 +240,17 @@ class ColorReducer {
   }
 
   calculateColorDistance(c1, c2) {
+    const key = `${c1.r},${c1.g},${c1.b}-${c2.r},${c2.g},${c2.b}`;
+    if (this.colorDistanceCache.has(key)) {
+      return this.colorDistanceCache.get(key);
+    }
+
     const lab1 = this.rgbToLab(c1.r, c1.g, c1.b);
     const lab2 = this.rgbToLab(c2.r, c2.g, c2.b);
-    return this.deltaE2000(lab1, lab2);
+    const distance = this.deltaE2000(lab1, lab2);
+
+    this.colorDistanceCache.set(key, distance);
+    return distance;
   }
 
   rgbToLab(r, g, b) {
