@@ -2,6 +2,7 @@ class ColorReducer {
   constructor() {
     this.palette = [];
     this.labCache = new Map();
+    this.onProgress = null;
   }
 
   reduceColors(imageData, colorCount) {
@@ -13,13 +14,16 @@ class ColorReducer {
     }
 
     const pixels = imageData.data;
+    this.reportProgress("Analyzing Image", 0);
     const palette = this.buildPalette(pixels, colorCount);
     this.palette = palette;
+    this.reportProgress("Applying Palette", 50);
     this.applyPalette(imageData, palette);
     return imageData;
   }
 
   buildPalette(pixels, colorCount) {
+    this.reportProgress("Analyzing Colors", 10);
     const colorArray = new Uint32Array(pixels.length / 4);
     const colorMap = new Map();
 
@@ -28,8 +32,16 @@ class ColorReducer {
       const color = (pixels[i] << 16) | (pixels[i + 1] << 8) | pixels[i + 2];
       colorArray[j] = color;
       colorMap.set(color, (colorMap.get(color) || 0) + 1);
+
+      if (j % 10000 === 0) {
+        this.reportProgress(
+          "Analyzing Colors",
+          10 + (j / (pixels.length / 4)) * 20
+        );
+      }
     }
 
+    this.reportProgress("Clustering Colors", 30);
     const colors = Array.from(colorMap.entries()).map(([color, count]) => ({
       r: (color >> 16) & 255,
       g: (color >> 8) & 255,
@@ -104,6 +116,11 @@ class ColorReducer {
       );
       centroids = newCentroids;
       iteration++;
+
+      this.reportProgress(
+        "Clustering Colors",
+        30 + (iteration / maxIterations) * 20
+      );
     }
 
     return centroids;
@@ -158,6 +175,7 @@ class ColorReducer {
   applyPalette(imageData, palette) {
     const pixels = imageData.data;
     const colorCache = new Map();
+    const totalPixels = pixels.length / 4;
 
     for (let i = 0; i < pixels.length; i += 4) {
       if (pixels[i + 3] === 0) continue;
@@ -173,6 +191,18 @@ class ColorReducer {
       pixels[i] = r;
       pixels[i + 1] = g;
       pixels[i + 2] = b;
+
+      if (i % 40000 === 0) {
+        this.reportProgress("Applying Palette", 50 + (i / pixels.length) * 50);
+      }
+    }
+
+    this.reportProgress("Finalizing", 100);
+  }
+
+  reportProgress(stage, progress) {
+    if (this.onProgress) {
+      this.onProgress(stage, progress);
     }
   }
 

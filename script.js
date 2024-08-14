@@ -35,6 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
   sliderLine.className = "slider-line";
   elements.sliderContainer.appendChild(sliderLine);
 
+  // initialize progress bar
+  elements.progressBar = document.getElementById("progressBar");
+  elements.progressMessage = document.getElementById("progressMessage");
+
   // Load dark mode preference from local storage
   initDarkMode();
 
@@ -196,33 +200,57 @@ document.addEventListener("DOMContentLoaded", () => {
       const colorCount = parseInt(elements.colorCountInput.value);
 
       elements.loadingIndicator.style.display = "flex";
+      updateProgress("Starting", 0);
 
       if (!worker) {
         worker = new Worker("color-reducer-worker.js");
       }
 
       worker.onmessage = function (e) {
-        const { reducedImageData, palette } = e.data;
-        ctx.putImageData(reducedImageData, 0, 0);
-        const reducedImageSrc = canvas.toDataURL("image/png");
-        elements.resultImage.src = reducedImageSrc;
-        elements.downloadLink.href = reducedImageSrc;
-        elements.downloadLink.download = "reduced_palette.png";
-        elements.downloadLink.style.display = "inline-block";
-        elements.loadingIndicator.style.display = "none";
-        updateSlider();
+        if (e.data.type === "progress") {
+          updateProgress(e.data.stage, e.data.progress);
+        } else if (e.data.type === "result") {
+          const { reducedImageData, palette } = e.data;
+          ctx.putImageData(reducedImageData, 0, 0);
+          const reducedImageSrc = canvas.toDataURL("image/png");
+          elements.resultImage.src = reducedImageSrc;
+          elements.downloadLink.href = reducedImageSrc;
+          elements.downloadLink.download = "reduced_palette.png";
+          elements.downloadLink.style.display = "inline-block";
+          elements.loadingIndicator.style.display = "none";
+          updateSlider();
 
-        if (palette) {
-          lastGeneratedPalette = palette;
-          displayPalette(palette);
-        } else {
-          console.error("Palette not received from worker");
+          if (palette) {
+            lastGeneratedPalette = palette;
+            displayPalette(palette);
+          } else {
+            console.error("Palette not received from worker");
+          }
+        } else if (e.data.type === "error") {
+          console.error("Error in worker:", e.data.message);
+          alert(
+            "An error occurred while processing the image. Please try again."
+          );
+          elements.loadingIndicator.style.display = "none";
         }
+      };
+
+      worker.onerror = function (error) {
+        console.error("Error in worker:", error);
+        alert(
+          "An error occurred while processing the image. Please try again."
+        );
+        elements.loadingIndicator.style.display = "none";
       };
 
       worker.postMessage({ imageData, colorCount }, [imageData.data.buffer]);
     };
     img.src = elements.imagePreview.src;
+  }
+
+  function updateProgress(stage, progress) {
+    elements.progressBar.style.width = `${progress}%`;
+    elements.progressMessage.textContent = `${stage}: ${progress.toFixed(2)}%`;
   }
 
   // Handle mouse down event for image dragging
