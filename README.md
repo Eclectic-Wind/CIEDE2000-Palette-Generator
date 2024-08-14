@@ -10,10 +10,7 @@ A web app that reduces the color palette of an uploaded image using k-means clus
 - Zoom and pan functionality for detailed viewing
 - Download the reduced image
 - Dark mode toggle for better visibility
-
-## Planned Features
-
-- Extracted color palette display, grouped by hue (currently in development)
+- Extracted color palette display, grouped by hue and saturation
 
 ## Getting Started
 

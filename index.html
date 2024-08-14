@@ -83,16 +83,21 @@
             draggable="false"
           />
         </div>
+        <div class="slider-container">
+          <input type="range" id="slider" min="0" max="100" value="50" />
+        </div>
         <div class="zoom-controls">
           <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
           <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
           <button id="resetZoom"><i class="fas fa-undo"></i></button>
         </div>
       </div>
-      <div class="slider-container">
-        <input type="range" id="slider" min="0" max="100" value="50" />
-      </div>
       <div class="result-container">
+        <div class="hue-sensitivity">
+          <label for="hueSensitivity">Hue Grouping Sensitivity:</label>
+          <input type="range" id="hueSensitivity" min="1" max="60" value="30" />
+          <span id="sensitivityValue">30</span>
+        </div>
         <div id="paletteContainer" class="palette-container"></div>
         <a id="downloadLink" class="download-btn" style="display: none"
           >Download Reduced Image</a

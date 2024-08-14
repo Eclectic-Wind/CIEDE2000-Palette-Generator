@@ -133,10 +133,10 @@ button:hover {
 }
 
 .slider-container {
-  position: absolute;
+  position: relative;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 20px;
+  bottom: 35px;
   width: 50%;
   height: 20px;
 }

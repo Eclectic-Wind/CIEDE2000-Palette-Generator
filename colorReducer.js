@@ -14,6 +14,7 @@ class ColorReducer {
 
     const pixels = imageData.data;
     const palette = this.buildPalette(pixels, colorCount);
+    this.palette = palette;
     this.applyPalette(imageData, palette);
     return imageData;
   }
