@@ -1,23 +1,32 @@
 :root {
   --bg-color: #ffffff;
   --text-color: #333333;
-  --button-bg: #3498db;
+  --bg-container: #f5f5f5;
+  --button-bg: #91a9bc;
   --button-text: #ffffff;
-  --button-hover: #2980b9;
+  --button-hover: #7a8d9c;
   --slider-bg: #d3d3d3;
-  --slider-thumb: #3498db;
+  --slider-thumb: #5c7080;
+  --scrollbar-bg: #e0e0e0;
+  --scrollbar-thumb: #9e9e9e;
+  --scrollbar-thumb-hover: #757575;
 }
 
 .dark {
   --bg-color: #1a1a1a;
   --text-color: #ffffff;
-  --button-bg: #2980b9;
+  --bg-container: #2b2b2b;
+  --button-bg: #546e7a;
   --button-text: #ffffff;
-  --button-hover: #3498db;
+  --button-hover: #324148;
   --slider-bg: #4a4a4a;
-  --slider-thumb: #2980b9;
+  --slider-thumb: #546e7a;
+  --scrollbar-bg: #3a3a3a;
+  --scrollbar-thumb: #666666;
+  --scrollbar-thumb-hover: #888888;
 }
 
+/* Global Styles */
 body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
@@ -30,15 +39,31 @@ body {
   justify-content: center;
 }
 
-.container {
-  width: 50vw;
-  margin: 0 auto;
-  padding: 20px;
+/* Container */
+.main {
+  position: absolute;
+  top: 5vh;
+  margin-left: 0.2in;
+  margin-right: 0.2in;
+  display: flex;
+  flex-direction: row;
 }
 
+.container {
+  margin-bottom: 5vh;
+  width: 80%;
+  margin: 0;
+  padding: 20px;
+  padding-bottom: 1in;
+  border-radius: 20px;
+  background-color: var(--bg-container);
+  margin-bottom: 0.2in;
+}
+
+/* Header */
 header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
 }
@@ -48,6 +73,14 @@ h1 {
   margin: 0;
 }
 
+#darkModeToggle {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  margin-top: 10px;
+}
+
+/* Controls */
 .controls {
   display: flex;
   justify-content: space-between;
@@ -80,6 +113,7 @@ h1 {
   padding: 5px;
 }
 
+/* Buttons */
 button {
   background-color: var(--button-bg);
   color: var(--button-text);
@@ -87,13 +121,19 @@ button {
   padding: 10px 15px;
   cursor: pointer;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.1s;
 }
 
 button:hover {
   background-color: var(--button-hover);
 }
 
+button:active {
+  background-color: var(--button-active);
+  transform: scale(0.98);
+}
+
+/* Image Comparison */
 .image-compare {
   position: relative;
   width: 100%;
@@ -111,12 +151,9 @@ button:hover {
   align-items: center;
   overflow: hidden;
   caret: transparent;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
   user-select: none;
+  background-color: var(--scrollbar-bg);
+  border-radius: 5px;
 }
 
 #imagePreview,
@@ -132,6 +169,7 @@ button:hover {
   clip-path: inset(0 0 0 50%);
 }
 
+/* Slider */
 .slider-container {
   position: relative;
   left: 50%;
@@ -139,15 +177,6 @@ button:hover {
   bottom: 35px;
   width: 50%;
   height: 20px;
-}
-
-.slider-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: #fff;
-  pointer-events: none;
 }
 
 #slider {
@@ -195,6 +224,7 @@ button:hover {
   cursor: ew-resize;
 }
 
+/* Zoom Controls */
 .zoom-controls {
   position: absolute;
   bottom: 10px;
@@ -212,6 +242,43 @@ button:hover {
   font-size: 18px;
 }
 
+/* Result Container */
+.result-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.hue-sensitivity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.palette-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 70%;
+}
+
+.hue-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.color-cube {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+}
+
+/* Download Button */
 .download-btn {
   display: inline-block;
   background-color: var(--button-bg);
@@ -219,14 +286,13 @@ button:hover {
   text-decoration: none;
   padding: 10px 15px;
   border-radius: 4px;
-  margin-top: 20px;
-  transition: background-color 0.3s;
 }
 
 .download-btn:hover {
   background-color: var(--button-hover);
 }
 
+/* Loading Indicator */
 .loading-indicator {
   position: fixed;
   top: 0;
@@ -280,11 +346,68 @@ button:hover {
   }
 }
 
-.loading-indicator p {
-  color: #ffffff;
+/* Info Panel */
+.info {
+  top: 5vh;
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  height: 100%;
+  background-color: var(--bg-container);
+  padding: 20px;
+  border-radius: 20px;
+  box-sizing: border-box;
+  margin-left: 0.1in;
+}
+
+.info h2 {
+  margin-bottom: 20px;
+}
+
+.info-content {
+  text-align: left;
+  overflow-y: scroll;
+  margin-bottom: 0.2in;
+}
+
+.info-content p {
+  margin-bottom: 15px;
+}
+
+.gamut-link {
+  color: #00a0e4;
+  text-decoration: none;
+}
+
+.gamut-link:hover {
+  text-decoration: underline;
+}
+
+.info-creator {
+  bottom: 20px;
+  width: 100%;
+  left: 0;
+  text-align: center;
+}
+
+.social-links {
   margin-top: 10px;
 }
 
+.social-links a {
+  display: inline-block;
+  margin: 0 5px;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: filter 0.3s;
+}
+
+.social-links a:hover {
+  filter: brightness(1.2);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .container {
     max-width: 95vw;
@@ -300,42 +423,7 @@ button:hover {
   button {
     margin: 10px 0;
   }
-}
 
-.result-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-}
-
-.palette-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  max-width: 70%;
-}
-
-.hue-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.color-cube {
-  width: 20px;
-  height: 20px;
-  border: 1px solid #ccc;
-}
-
-.download-btn {
-  margin-top: 0;
-}
-
-@media (max-width: 768px) {
   .result-container {
     flex-direction: column;
     align-items: flex-start;
@@ -344,4 +432,25 @@ button:hover {
   .palette-container {
     max-width: 100%;
   }
+}
+
+/* Webkit Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+  border: 3px solid var(--scrollbar-bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }

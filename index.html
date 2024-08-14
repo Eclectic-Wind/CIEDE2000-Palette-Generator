@@ -13,97 +13,124 @@
     <script type="module" src="script.js" defer></script>
   </head>
   <body>
-    <div class="container">
-      <header style="display: flex; flex-direction: column">
-        <h1>CIEDE2000 Palette Generator</h1>
-        <h3 style="margin-bottom: 10px">
-          Made by kam.
-          <a
-            href="https://discordapp.com/users/178093021131177984"
-            target="_blank"
-            style="
-              display: inline-block;
-              margin-left: 10px;
-              color: var(--text-color);
-              text-decoration: none;
-              transition: filter 0.3s;
-            "
-          >
-            <i class="fab fa-discord" style="margin-right: 5px"></i>
-          </a>
-          <a
-            href="https://x.com/KamPersonal"
-            target="_blank"
-            style="
-              display: inline-block;
-              margin-left: 10px;
-              color: var(--text-color);
-              text-decoration: none;
-              transition: filter 0.3s;
-            "
-          >
-            <i class="fab fa-twitter" style="margin-right: 5px"></i>
-          </a>
-        </h3>
+    <div class="main">
+      <div class="container">
         <button id="darkModeToggle"><i class="fas fa-moon"></i></button>
-      </header>
-      <div class="controls">
-        <input
-          type="file"
-          id="imageUpload"
-          accept="image/png"
-          class="file-input"
-        />
-        <div class="color-count">
-          <label for="colorCount">Colors:</label>
-          <input type="number" id="colorCount" value="16" min="2" max="256" />
-        </div>
-        <button id="reduceColors">Reduce Colors</button>
-      </div>
-      <div
-        id="loadingIndicator"
-        class="loading-indicator"
-        style="display: none"
-      >
-        <div class="progress-container">
-          <div id="progressBar"></div>
-        </div>
-        <p id="progressMessage">Processing image...</p>
-      </div>
-      <div class="image-compare">
-        <div class="image-container" id="imageContainer">
-          <img
-            id="imagePreview"
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23ddd'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='%23555'%3EUpload Image%3C/text%3E%3C/svg%3E"
-            alt="Image preview"
-            draggable="false"
+
+        <header style="display: flex; flex-direction: column">
+          <h1>CIEDE2000 Palette Generator</h1>
+        </header>
+        <div class="controls">
+          <input
+            type="file"
+            id="imageUpload"
+            accept="image/png"
+            class="file-input"
           />
-          <img
-            id="resultImage"
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23ddd'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='%23555'%3EResult Image%3C/text%3E%3C/svg%3E"
-            alt="Result image"
-            draggable="false"
-          />
+          <div class="color-count">
+            <label for="colorCount">Colors:</label>
+            <input type="number" id="colorCount" value="16" min="2" max="256" />
+          </div>
+          <button id="reduceColors">Reduce Colors</button>
         </div>
-        <div class="slider-container">
-          <input type="range" id="slider" min="0" max="100" value="50" />
-        </div>
-        <div class="zoom-controls">
-          <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
-          <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
-          <button id="resetZoom"><i class="fas fa-undo"></i></button>
-        </div>
-      </div>
-      <div class="result-container">
-        <div class="hue-sensitivity">
-          <label for="hueSensitivity">Hue Grouping Sensitivity:</label>
-          <input type="range" id="hueSensitivity" min="1" max="60" value="30" />
-          <span id="sensitivityValue">30</span>
-        </div>
-        <div id="paletteContainer" class="palette-container"></div>
-        <a id="downloadLink" class="download-btn" style="display: none"
-          >Download Reduced Image</a
+        <div
+          id="loadingIndicator"
+          class="loading-indicator"
+          style="display: none"
         >
+          <div class="progress-container">
+            <div id="progressBar"></div>
+          </div>
+          <p id="progressMessage">Processing image...</p>
+        </div>
+        <div class="image-compare">
+          <div class="image-container" id="imageContainer">
+            <img
+              id="imagePreview"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23ddd'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='%23555'%3EUpload Image%3C/text%3E%3C/svg%3E"
+              alt="Image preview"
+              draggable="false"
+            />
+            <img
+              id="resultImage"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23ddd'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='%23555'%3EResult Image%3C/text%3E%3C/svg%3E"
+              alt="Result image"
+              draggable="false"
+            />
+          </div>
+          <div class="slider-container">
+            <input type="range" id="slider" min="0" max="100" value="50" />
+          </div>
+          <div class="zoom-controls">
+            <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
+            <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
+            <button id="resetZoom"><i class="fas fa-undo"></i></button>
+          </div>
+        </div>
+        <div class="result-container">
+          <div class="hue-sensitivity">
+            <label for="hueSensitivity">Hue Grouping Sensitivity:</label>
+            <input
+              type="range"
+              id="hueSensitivity"
+              min="1"
+              max="60"
+              value="30"
+            />
+            <span id="sensitivityValue">30</span>
+          </div>
+          <div id="paletteContainer" class="palette-container"></div>
+          <a id="downloadLink" class="download-btn" style="display: none"
+            >Download Reduced Image</a
+          >
+        </div>
+      </div>
+      <div class="info">
+        <h2>Info guide</h2>
+        <div class="info-content">
+          <p>
+            This is a highly accurate palette generator via the CIEDE2000 color
+            difference formula.
+          </p>
+          <p>
+            <b><i>Larger resolutions</i></b> and
+            <b><i>higher color count</i></b> will lead to
+            <b><i>longer processing time.</i></b>
+          </p>
+          <p>
+            Higher
+            <b
+              ><a
+                href="https://www.benq.com/en-us/knowledge-center/knowledge/color-gamut-monitor.html#:~:text=The%20Definition%20of%20Color%20Gamut,red%2C%20green%2C%20and%20blue."
+                class="gamut-link"
+                >gamut range</a
+              ></b
+            >
+            in source image will mix more colors together. This is because we
+            want only a limited color amount.
+          </p>
+          <p>
+            Due to above, I advise to use, for extremely colorful images, a
+            smaller more limited portion of the image as source.
+          </p>
+        </div>
+        <div class="info-creator">
+          <h3>Made by kam.</h3>
+          <div class="social-links">
+            <a
+              href="https://discordapp.com/users/178093021131177984"
+              target="_blank"
+            >
+              <i class="fab fa-discord"></i>
+            </a>
+            <a href="https://x.com/KamPersonal" target="_blank">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="https://github.com/Eclectic-Wind" target="_blank">
+              <i class="fab fa-github"></i>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </body>
