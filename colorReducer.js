@@ -52,6 +52,87 @@ class ColorReducer {
     return this.kMeansClustering(colors, colorCount);
   }
 
+  applyPalette(imageData, palette) {
+    const pixels = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
+    const visited = new Array(width * height).fill(false);
+    const totalPixels = width * height;
+    let processedPixels = 0;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (!visited[y * width + x]) {
+          this.growRegion(imageData, x, y, visited, palette);
+        }
+        processedPixels++;
+        if (processedPixels % 1000 === 0) {
+          this.reportProgress(
+            "Applying Palette",
+            50 + (processedPixels / totalPixels) * 50
+          );
+        }
+      }
+    }
+
+    this.reportProgress("Finalizing", 100);
+  }
+
+  growRegion(imageData, startX, startY, visited, palette) {
+    const pixels = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
+    const startIndex = (startY * width + startX) * 4;
+    const startColor = {
+      r: pixels[startIndex],
+      g: pixels[startIndex + 1],
+      b: pixels[startIndex + 2],
+    };
+    const newColor = this.findClosestColor(startColor, palette);
+    const queue = [[startX, startY]];
+    const colorThreshold = 12; // Adjust this value to control region size
+
+    while (queue.length > 0) {
+      const [x, y] = queue.shift();
+      const index = (y * width + x) * 4;
+
+      if (visited[y * width + x]) continue;
+
+      const currentColor = {
+        r: pixels[index],
+        g: pixels[index + 1],
+        b: pixels[index + 2],
+      };
+
+      if (this.colorDistance(startColor, currentColor) <= colorThreshold) {
+        visited[y * width + x] = true;
+        pixels[index] = newColor.r;
+        pixels[index + 1] = newColor.g;
+        pixels[index + 2] = newColor.b;
+
+        // Check neighboring pixels
+        const neighbors = [
+          [x - 1, y],
+          [x + 1, y],
+          [x, y - 1],
+          [x, y + 1],
+        ];
+
+        for (const [nx, ny] of neighbors) {
+          if (
+            nx >= 0 &&
+            nx < width &&
+            ny >= 0 &&
+            ny < height &&
+            !visited[ny * width + nx]
+          ) {
+            queue.push([nx, ny]);
+          }
+        }
+      }
+    }
+  }
+
   getPalette() {
     return this.palette.map((color) => ({
       ...color,
@@ -172,34 +253,6 @@ class ColorReducer {
     );
   }
 
-  applyPalette(imageData, palette) {
-    const pixels = imageData.data;
-    const colorCache = new Map();
-    const totalPixels = pixels.length / 4;
-
-    for (let i = 0; i < pixels.length; i += 4) {
-      if (pixels[i + 3] === 0) continue;
-      const colorKey = (pixels[i] << 16) | (pixels[i + 1] << 8) | pixels[i + 2];
-      if (!colorCache.has(colorKey)) {
-        const closestColor = this.findClosestColor(
-          { r: pixels[i], g: pixels[i + 1], b: pixels[i + 2] },
-          palette
-        );
-        colorCache.set(colorKey, closestColor);
-      }
-      const { r, g, b } = colorCache.get(colorKey);
-      pixels[i] = r;
-      pixels[i + 1] = g;
-      pixels[i + 2] = b;
-
-      if (i % 40000 === 0) {
-        this.reportProgress("Applying Palette", 50 + (i / pixels.length) * 50);
-      }
-    }
-
-    this.reportProgress("Finalizing", 100);
-  }
-
   reportProgress(stage, progress) {
     if (this.onProgress) {
       this.onProgress(stage, progress);
@@ -219,6 +272,13 @@ class ColorReducer {
     const lab1 = this.rgbToLab(c1.r, c1.g, c1.b);
     const lab2 = this.rgbToLab(c2.r, c2.g, c2.b);
     return this.deltaE2000(lab1, lab2);
+  }
+
+  colorDistance(c1, c2) {
+    const rDiff = c1.r - c2.r;
+    const gDiff = c1.g - c2.g;
+    const bDiff = c1.b - c2.b;
+    return Math.sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
   }
 
   rgbToLab(r, g, b) {

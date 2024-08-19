@@ -77,6 +77,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     elements.imagePreview.style.transform = transform;
     elements.resultImage.style.transform = transform;
+
+    // Add image-rendering property for crisp pixels
+    elements.imagePreview.style.imageRendering =
+      scale > 1 ? "pixelated" : "auto";
+    elements.resultImage.style.imageRendering =
+      scale > 1 ? "pixelated" : "auto";
+  }
+
+  // Modify the zoom function
+  function zoom(factor) {
+    scale *= factor;
+    updateImageTransform();
   }
 
   // Reset zoom and position of the images
@@ -276,12 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleMouseUp() {
     isDragging = false;
     elements.imageContainer.style.cursor = "grab";
-  }
-
-  // Zoom in or out on the image
-  function zoom(factor) {
-    scale *= factor;
-    updateImageTransform();
   }
 
   // Toggle dark mode and save preference
