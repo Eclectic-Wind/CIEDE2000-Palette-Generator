@@ -18,6 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
     sliderContainer: document.querySelector(".slider-container"),
     hueSensitivitySlider: document.getElementById("hueSensitivity"),
     sensitivityValue: document.getElementById("sensitivityValue"),
+    copyPalette: document.getElementById("copyPalette"),
+    downloadPalette: document.getElementById("downloadPalette"),
+    paletteExport: document.getElementById("paletteExport"),
+    undoBtn: document.getElementById("undoBtn"),
+    redoBtn: document.getElementById("redoBtn"),
+    historyControls: document.getElementById("historyControls"),
   };
 
   // State variables
@@ -29,6 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let lastGeneratedPalette = [];
   let isDragging = false;
   let startX, startY;
+  let currentImageSrc = null;
+  let paletteHistory = [];
+  let historyIndex = -1;
+  let lastResultImageSrc = null;
 
   // Initialize slider line for image comparison
   const sliderLine = document.createElement("div");
@@ -39,6 +49,163 @@ document.addEventListener("DOMContentLoaded", () => {
   elements.progressBar = document.getElementById("progressBar");
   elements.progressMessage = document.getElementById("progressMessage");
 
+  // Drag and drop handlers
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    elements.imageContainer.classList.add("drag-over");
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    elements.imageContainer.classList.remove("drag-over");
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    elements.imageContainer.classList.remove("drag-over");
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith("image/")) {
+        elements.imageUpload.files = files;
+        handleImageUpload({ target: { files: files } });
+      } else {
+        alert("Please drop an image file.");
+      }
+    }
+  }
+
+  // Build a palette canvas arranged by hue-group and value (dark-to-light), matching on-screen display
+  function buildPaletteCanvas(palette) {
+    const groups = improvedHueGrouping(palette, HUE_THRESHOLD);
+    // Sort each group dark-to-light (high L first)
+    groups.forEach((g) => g.sort((a, b) => b.l - a.l));
+
+    const size = 32;
+    const groupGap = 6;
+    const maxCols = Math.max(...groups.map((g) => g.length));
+    const totalWidth = maxCols * size;
+    const totalHeight =
+      groups.length * size + (groups.length - 1) * groupGap;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = totalWidth;
+    canvas.height = totalHeight;
+    const ctx = canvas.getContext("2d");
+
+    // Transparent background
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let y = 0;
+    groups.forEach((group, gi) => {
+      group.forEach((color, ci) => {
+        ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+        ctx.fillRect(ci * size, y, size, size);
+      });
+      y += size + groupGap;
+    });
+
+    return canvas;
+  }
+
+  // Download palette as PNG
+  function downloadPalettePNG() {
+    if (!lastGeneratedPalette || lastGeneratedPalette.length === 0) {
+      alert("No palette to export. Generate one first!");
+      return;
+    }
+    const canvas = buildPaletteCanvas(lastGeneratedPalette);
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "palette.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showNotification("Palette saved as PNG");
+    });
+  }
+
+  // Copy palette PNG to clipboard
+  async function copyPaletteToClipboard() {
+    if (!lastGeneratedPalette || lastGeneratedPalette.length === 0) {
+      alert("No palette to copy. Generate one first!");
+      return;
+    }
+    const canvas = buildPaletteCanvas(lastGeneratedPalette);
+    canvas.toBlob(async (blob) => {
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob }),
+        ]);
+        showNotification("Palette copied to clipboard");
+      } catch (err) {
+        console.error("Clipboard write failed:", err);
+        showNotification("Copy failed — try downloading instead");
+      }
+    });
+  }
+
+  // Convert RGB to HEX
+  function rgbToHex(r, g, b) {
+    return (
+      "#" +
+      ("0" + parseInt(r, 10).toString(16)).slice(-2) +
+      ("0" + parseInt(g, 10).toString(16)).slice(-2) +
+      ("0" + parseInt(b, 10).toString(16)).slice(-2)
+    );
+  }
+
+  // Show notification
+  function showNotification(message) {
+    const notification = document.createElement("div");
+    notification.className = "copy-notification";
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.classList.add("hide");
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 300);
+    }, 2000);
+  }
+
+  // Palette history management
+  function addToHistory(palette) {
+    paletteHistory = paletteHistory.slice(0, historyIndex + 1);
+    paletteHistory.push(JSON.parse(JSON.stringify(palette)));
+    historyIndex++;
+    updateHistoryButtons();
+  }
+
+  function undoPalette() {
+    if (historyIndex > 0) {
+      historyIndex--;
+      displayPalette(paletteHistory[historyIndex]);
+      updateHistoryButtons();
+    }
+  }
+
+  function redoPalette() {
+    if (historyIndex < paletteHistory.length - 1) {
+      historyIndex++;
+      displayPalette(paletteHistory[historyIndex]);
+      updateHistoryButtons();
+    }
+  }
+
+  function updateHistoryButtons() {
+    elements.undoBtn.disabled = historyIndex <= 0;
+    elements.redoBtn.disabled = historyIndex >= paletteHistory.length - 1;
+  }
+
   // Load dark mode preference from local storage
   initDarkMode();
 
@@ -47,6 +214,9 @@ document.addEventListener("DOMContentLoaded", () => {
   elements.reduceColorsBtn.addEventListener("click", handleReduceColors);
   elements.slider.addEventListener("input", updateSlider);
   elements.imageContainer.addEventListener("mousedown", handleMouseDown);
+  elements.imageContainer.addEventListener("dragover", handleDragOver);
+  elements.imageContainer.addEventListener("dragleave", handleDragLeave);
+  elements.imageContainer.addEventListener("drop", handleDrop);
   document.addEventListener("mousemove", handleMouseMove);
   document.addEventListener("mouseup", handleMouseUp);
   elements.zoomIn.addEventListener("click", () => zoom(1.2));
@@ -54,6 +224,10 @@ document.addEventListener("DOMContentLoaded", () => {
   elements.resetZoom.addEventListener("click", resetZoomAndPosition);
   elements.darkModeToggle.addEventListener("click", toggleDarkMode);
   elements.hueSensitivitySlider.addEventListener("input", updateHueSensitivity);
+  elements.copyPalette.addEventListener("click", copyPaletteToClipboard);
+  elements.downloadPalette.addEventListener("click", downloadPalettePNG);
+  elements.undoBtn.addEventListener("click", undoPalette);
+  elements.redoBtn.addEventListener("click", redoPalette);
 
   // Function to initialize dark mode based on user preference
   function initDarkMode() {
@@ -121,6 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
     HUE_THRESHOLD = parseInt(this.value);
     elements.sensitivityValue.textContent = HUE_THRESHOLD;
     if (elements.paletteContainer.children.length > 0) {
+      addToHistory(lastGeneratedPalette);
       displayPalette(lastGeneratedPalette);
     }
   }
@@ -181,16 +356,30 @@ document.addEventListener("DOMContentLoaded", () => {
         const colorCube = document.createElement("div");
         colorCube.className = "color-cube";
         colorCube.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
+        const hex = rgbToHex(color.r, color.g, color.b);
         colorCube.title = `RGB(${color.r}, ${color.g}, ${
           color.b
         })\nHSL(${Math.round(color.h)}, ${Math.round(color.s)}%, ${Math.round(
           color.l
-        )}%)`;
+        )}%)\nHEX(${hex})\n\nClick to copy`;
+
+        // Add click to copy functionality
+        colorCube.addEventListener("click", () => {
+          const copyText = hex;
+          navigator.clipboard.writeText(copyText).then(() => {
+            showNotification(`Copied: ${copyText}`);
+          });
+        });
+
         hueGroupContainer.appendChild(colorCube);
       });
 
       elements.paletteContainer.appendChild(hueGroupContainer);
     });
+
+    // Show palette export and history controls
+    elements.paletteExport.style.display = "flex";
+    elements.historyControls.style.display = "flex";
   }
 
   // Handle color reduction process
@@ -234,6 +423,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (palette) {
             lastGeneratedPalette = palette;
+            lastResultImageSrc = reducedImageSrc;
+            addToHistory(palette);
             displayPalette(palette);
           } else {
             console.error("Palette not received from worker");

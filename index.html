@@ -31,14 +31,20 @@
           <input
             type="file"
             id="imageUpload"
-            accept="image/png"
+            accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
             class="file-input"
           />
-          <div class="color-count">
-            <label for="colorCount">Colors:</label>
-            <input type="number" id="colorCount" value="16" min="2" max="256" />
+          <div class="controls-right">
+            <div class="color-count">
+              <label for="colorCount">Colors:</label>
+              <input type="number" id="colorCount" value="16" min="2" max="256" />
+            </div>
+            <button id="reduceColors">Reduce Colors</button>
+            <div class="history-controls" id="historyControls" style="display: none">
+              <button id="undoBtn" title="Undo" class="history-btn"><i class="fas fa-undo"></i></button>
+              <button id="redoBtn" title="Redo" class="history-btn"><i class="fas fa-redo"></i></button>
+            </div>
           </div>
-          <button id="reduceColors">Reduce Colors</button>
         </div>
         <div
           id="loadingIndicator"
@@ -87,9 +93,20 @@
             <span id="sensitivityValue">30</span>
           </div>
           <div id="paletteContainer" class="palette-container"></div>
-          <a id="downloadLink" class="download-btn" style="display: none"
-            >Download Reduced Image</a
-          >
+          <div class="actions-section">
+            <a id="downloadLink" class="download-btn" style="display: none"
+              ><i class="fas fa-download"></i> Download Reduced Image</a
+            >
+            <div class="palette-export" id="paletteExport" style="display: none">
+              <span class="palette-export-label">Palette:</span>
+              <button id="copyPalette" title="Copy palette image to clipboard">
+                <i class="fas fa-clipboard"></i> Copy
+              </button>
+              <button id="downloadPalette" title="Download palette as PNG">
+                <i class="fas fa-download"></i> Save PNG
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="info">
@@ -122,7 +139,7 @@
           </p>
         </div>
         <div class="info-creator">
-          <h3>Made by kam.</h3>
+          <h3>Made by Chris Villarin.</h3>
           <div class="social-links">
             <a
               href="https://discordapp.com/users/178093021131177984"
