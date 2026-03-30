@@ -5,7 +5,7 @@ class ColorReducer {
     this.onProgress = null;
   }
 
-  reduceColors(imageData, colorCount) {
+  reduceColors(imageData, colorCount, colorThreshold = 12) {
     if (!(imageData instanceof ImageData)) {
       throw new Error("Invalid imageData: must be an instance of ImageData");
     }
@@ -18,7 +18,7 @@ class ColorReducer {
     const palette = this.buildPalette(pixels, colorCount);
     this.palette = palette;
     this.reportProgress("Applying Palette", 50);
-    this.applyPalette(imageData, palette);
+    this.applyPalette(imageData, palette, colorThreshold);
     return imageData;
   }
 
@@ -52,7 +52,7 @@ class ColorReducer {
     return this.kMeansClustering(colors, colorCount);
   }
 
-  applyPalette(imageData, palette) {
+  applyPalette(imageData, palette, colorThreshold = 12) {
     const pixels = imageData.data;
     const width = imageData.width;
     const height = imageData.height;
@@ -63,7 +63,7 @@ class ColorReducer {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         if (!visited[y * width + x]) {
-          this.growRegion(imageData, x, y, visited, palette);
+          this.growRegion(imageData, x, y, visited, palette, colorThreshold);
         }
         processedPixels++;
         if (processedPixels % 1000 === 0) {
@@ -78,7 +78,7 @@ class ColorReducer {
     this.reportProgress("Finalizing", 100);
   }
 
-  growRegion(imageData, startX, startY, visited, palette) {
+  growRegion(imageData, startX, startY, visited, palette, colorThreshold = 12) {
     const pixels = imageData.data;
     const width = imageData.width;
     const height = imageData.height;
@@ -90,8 +90,6 @@ class ColorReducer {
     };
     const newColor = this.findClosestColor(startColor, palette);
     const queue = [[startX, startY]];
-    const colorThreshold = 12; // Adjust this value to control region size
-
     while (queue.length > 0) {
       const [x, y] = queue.shift();
       const index = (y * width + x) * 4;

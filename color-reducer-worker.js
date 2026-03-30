@@ -1,7 +1,7 @@
 self.importScripts("colorReducer.js");
 
 self.addEventListener("message", function (e) {
-  const { imageData, colorCount } = e.data;
+  const { imageData, colorCount, colorThreshold } = e.data;
   const colorReducer = new ColorReducer();
 
   colorReducer.onProgress = (stage, progress) => {
@@ -9,7 +9,7 @@ self.addEventListener("message", function (e) {
   };
 
   try {
-    const reducedImageData = colorReducer.reduceColors(imageData, colorCount);
+    const reducedImageData = colorReducer.reduceColors(imageData, colorCount, colorThreshold);
     const palette = colorReducer.getPalette();
     self.postMessage({ type: "result", reducedImageData, palette }, [
       reducedImageData.data.buffer,

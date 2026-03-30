@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     sliderContainer: document.querySelector(".slider-container"),
     hueSensitivitySlider: document.getElementById("hueSensitivity"),
     sensitivityValue: document.getElementById("sensitivityValue"),
+    blendingSensitivitySlider: document.getElementById("blendingSensitivity"),
+    blendingSensitivityValue: document.getElementById("blendingSensitivityValue"),
     copyPalette: document.getElementById("copyPalette"),
     downloadPalette: document.getElementById("downloadPalette"),
     paletteExport: document.getElementById("paletteExport"),
@@ -224,6 +226,9 @@ document.addEventListener("DOMContentLoaded", () => {
   elements.resetZoom.addEventListener("click", resetZoomAndPosition);
   elements.darkModeToggle.addEventListener("click", toggleDarkMode);
   elements.hueSensitivitySlider.addEventListener("input", updateHueSensitivity);
+  elements.blendingSensitivitySlider.addEventListener("input", () => {
+    elements.blendingSensitivityValue.textContent = elements.blendingSensitivitySlider.value;
+  });
   elements.copyPalette.addEventListener("click", copyPaletteToClipboard);
   elements.downloadPalette.addEventListener("click", downloadPalettePNG);
   elements.undoBtn.addEventListener("click", undoPalette);
@@ -399,6 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
       const colorCount = parseInt(elements.colorCountInput.value);
+      const colorThreshold = parseInt(elements.blendingSensitivitySlider.value);
 
       elements.loadingIndicator.style.display = "flex";
       updateProgress("Starting", 0);
@@ -446,7 +452,7 @@ document.addEventListener("DOMContentLoaded", () => {
         elements.loadingIndicator.style.display = "none";
       };
 
-      worker.postMessage({ imageData, colorCount }, [imageData.data.buffer]);
+      worker.postMessage({ imageData, colorCount, colorThreshold }, [imageData.data.buffer]);
     };
     img.src = elements.imagePreview.src;
   }
